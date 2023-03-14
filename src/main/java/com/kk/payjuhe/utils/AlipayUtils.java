@@ -44,8 +44,9 @@ public class AlipayUtils {
         AlipayTradeQueryResponse response;
         try {
             response = alipayClient.execute(request);
-        } catch (AlipayApiException e) {
-            throw new RuntimeException(e);
+        } catch (Exception e) {
+            log.error("查询出错了:{}",e.toString());
+            return "请先将 文件中的app id、private key 信息替换为自己的";
         }
         if(response.isSuccess()){
             log.info("查单成功");
@@ -88,8 +89,10 @@ public class AlipayUtils {
         AlipayTradePagePayResponse response;
         try {
             response = alipayClient.pageExecute(request);
-        } catch (AlipayApiException e) {
-            throw new RuntimeException(e);
+        } catch (Exception e) {
+            log.error("支付出错了:{}",e.toString());
+            return "<el-tag>请先将 文件中的app id、private key 信息替换为自己的</el-tag>\n";
+
         }
         if(response.isSuccess()){
             System.out.println("调用成功,order id="+id);
