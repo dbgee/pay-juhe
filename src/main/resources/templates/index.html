@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>收银台</title>
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+    <style>
+        #app{
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        #order-area,#header{
+            display: flex;
+        }
+        #do-order,#query-order{
+            display: flex;
+            flex-direction: column;
+        }
+        #header{
+            flex-direction: column;
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <div id="header" >
+            <h3>支付宝收银台</h3>
+            <form action="/order">
+                请输入订单号 <input type="text" name="id" id="order_id" size="30" v-model="orderId">
+                <el-button type="primary" @click="generateId">自动生成订单号</el-button>
+                <el-button type="primary" @click="order">下单</el-button>
+                <el-button type="primary" @click="query">查单</el-button>
+            </form>
+        </div>
+        <div id="order-area" >
+            <div id="do-order">
+                <el-tag>下单窗口</el-tag>
+                <iframe :srcdoc="pay_form"  style="width: auto;height: 560px"></iframe>
+            </div>
+
+            <div id="query-order">
+                <el-tag>订单状态</el-tag>
+                <span >{{orderStatus}}</span>
+            </div>
+        </div>
+    </div>
+</body>
+    <script src="https://unpkg.com/vue@2/dist/vue.js"></script>
+    <script src="https://unpkg.com/element-ui/lib/index.js"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+
+    <script>
+        new Vue({
+            el: '#app',
+            data: function() {
+                return { visible: false ,orderId:'',pay_form:'',orderStatus:''}
+            },
+            methods:{
+                order(){
+                    if(this.orderId===''){
+                        this.$message.error("订单id 不可为空")
+                        return ;
+                    }
+                    axios.get('/order'+'?id='+this.orderId)
+                        .then(res=>{
+                            this.pay_form=res.data
+                        })
+                },
+                query(){
+                    if(this.orderId===''){
+                        this.$message.error("订单id 不可为空")
+                        return ;
+                    }
+                    axios.get('/query'+'?id='+this.orderId)
+                        .then(res=>{
+                            this.orderStatus=res.data
+                        })
+                },
+                generateId(){
+                    const now = new Date()
+                    let month = now.getMonth() + 1
+                    let day = now.getDate()
+                    let hour = now.getHours()
+                    let minutes = now.getMinutes()
+                    let seconds = now.getSeconds()
+                    month = this.setTimeDateFmt(month)
+                    day = this.setTimeDateFmt(day)
+                    hour = this.setTimeDateFmt(hour)
+                    minutes = this.setTimeDateFmt(minutes)
+                    seconds = this.setTimeDateFmt(seconds)
+                    let orderCode = now.getFullYear().toString() + month.toString() + day + hour + minutes + seconds + (Math.round(Math.random() * 1000000)).toString();
+                    this.orderId=orderCode;
+                    return orderCode;
+                },
+                setTimeDateFmt(s){
+                    return s < 10 ? '0' + s : s;
+                }
+            }
+        })
+    </script>
+</html>
